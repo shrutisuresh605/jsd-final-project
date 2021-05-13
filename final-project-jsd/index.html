@@ -1,0 +1,152 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+
+  <title>Find your Brewery</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <!-- font awesome -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.8.0/firebase-ui-auth.css"/>
+
+  <style>
+    /* body {
+      background:
+      radial-gradient(hsl(0, 100%, 27%) 4%, hsl(0, 100%, 18%) 9%, hsla(0, 100%, 20%, 0) 9%) 0 0,
+      radial-gradient(hsl(0, 100%, 27%) 4%, hsl(0, 100%, 18%) 8%, hsla(0, 100%, 20%, 0) 10%) 50px 50px,
+      radial-gradient(hsla(0, 100%, 30%, 0.8) 20%, hsla(0, 100%, 20%, 0)) 50px 0,
+      radial-gradient(hsla(0, 100%, 30%, 0.8) 20%, hsla(0, 100%, 20%, 0)) 0 50px,
+      radial-gradient(hsla(0, 100%, 20%, 1) 35%, hsla(0, 100%, 20%, 0) 60%) 50px 0,
+      radial-gradient(hsla(0, 100%, 20%, 1) 35%, hsla(0, 100%, 20%, 0) 60%) 100px 50px,
+      radial-gradient(hsla(0, 100%, 15%, 0.7), hsla(0, 100%, 20%, 0)) 0 0,
+      radial-gradient(hsla(0, 100%, 15%, 0.7), hsla(0, 100%, 20%, 0)) 50px 50px,
+      linear-gradient(45deg, hsla(0, 100%, 20%, 0) 49%, hsla(0, 100%, 0%, 1) 50%, hsla(0, 100%, 20%, 0) 70%) 0 0,
+      linear-gradient(-45deg, hsla(0, 100%, 20%, 0) 49%, hsla(0, 100%, 0%, 1) 50%, hsla(0, 100%, 20%, 0) 70%) 0 0;
+      background-color: #300;
+      background-size: 100px 100px; 
+    }  */
+
+    .fa {
+      cursor: pointer;
+      padding-left: 3px;
+    }
+  </style>
+</head>
+
+<body>
+ 
+<div id="firebaseui-auth-container"></div>
+
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <div class="navbar-header text-danger">
+        <h1>Brewery Finder</h1>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="panel-group">
+      <div class="panel panel-danger">
+        <div class="panel-heading">Enter details to see list of breweries!</div>
+        <div class="panel-body">
+          <form action="" id="message-form">
+            <!-- <div class="form-group">
+              <label>Message:</label>
+              <textarea id="message" type="text" class="form-control"></textarea>
+            </div> -->
+            <input type="text" class="city" placeholder = "Enter city"></input>
+            <input type="text" class= "state" placeholder = "Enter State"></input>
+            <select name="type" id="type">
+                    <option disabled selected>Select a brewery type</option>
+                    <option>Micro</option>
+                    <option>Nano</option>
+                    <option>Regional</option>
+                    <option>Brewpub</option>
+                    <option>Large</option>
+                    <option>Planning</option>
+                    <option>Bar</option>
+                    <option>Contract</option>
+                    <option>Proprietor</option>
+                    <option>Closed</option>
+            </select>
+            <button class="btn btn-default show-breweries">Find breweries</button>
+            <button class="btn btn-default show-visited">Show visited</button>
+            <button class=" btn btn-default show-favorite">Show favorites</button>
+            
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group">
+      <div class="panel panel-default">
+        <div class="panel-heading">Brewery List</div>
+        <div class="panel-body">
+          <ul class="message-board">
+              <table class="table" id="brewtable">
+                  <tr>
+                      <th>Name</th>
+                      <th>Address</th>
+                      <th>Type</th>
+                      <th>Visited</th>
+                      <th>Favorite</th>
+                  </tr>
+              </table>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-database.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<!-- Firebase CDN -->
+<!-- <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script> -->
+<script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/ui/4.8.0/firebase-ui-auth.js"></script>
+  
+
+
+  
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+   
+    apiKey: "AIzaSyCHcwO7-KAWsXBKWJG1szyMO-76H2Zf60g",
+    authDomain: "final-project-shruti.firebaseapp.com",
+    projectId: "final-project-shruti",
+    storageBucket: "final-project-shruti.appspot.com",
+    messagingSenderId: "461575465250",
+    appId: "1:461575465250:web:a8df94c6de404b1f505d7b",
+    databaseURL: "https://final-project-shruti-default-rtdb.firebaseio.com/"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // Initialize the FirebaseUI Widget using Firebase.
+  var ui = new firebaseui.auth.AuthUI(firebase.auth());
+  // The start method will wait until the DOM is loaded.
+//   ui.start('#firebaseui-auth-container', uiConfig);
+</script>
+  
+
+  <!-- Bootstrap JS -->
+  <script rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <!-- jQuery -->
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+
+  <!-- js -->
+  <script src="app.js"></script>
+
+  
+
+</body>
+
+</html>
